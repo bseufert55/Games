@@ -7,22 +7,15 @@ import javafx.application.Application;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
-import javafx.geometry.Orientation;
-import javafx.geometry.Pos;
 import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
-import javafx.scene.control.ListView;
-import javafx.scene.control.SplitPane;
-import javafx.scene.control.TableView;
-import javafx.scene.control.TextField;
 import javafx.scene.effect.BlendMode;
 import javafx.scene.effect.BoxBlur;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
-import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
@@ -34,21 +27,24 @@ import javafx.scene.shape.Rectangle;
 import javafx.scene.shape.StrokeType;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
-import javafx.scene.text.Text;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 
 import static java.lang.Math.random;
-
+/* Author: Bianca Seufert
+ * Date: May 23, 2016
+ * Class: AP Computer Science
+ * Project: Tic Tac Toe Game
+ */
 
 public class UI extends Application {
-	
+	//These are my main pains that I pass as variables so that I can change them from anywhere with out having to make new ones
 	private Stage primaryStage = null;
 	private BorderPane base = new BorderPane();
 	private VBox glass = new VBox(); 
 	private GridPane grid = new GridPane();
 	private StackPane form = new StackPane();
-	private GameBoardPane playerBoard = new GameBoardPane(base,glass,grid,form);
+	private GameBoardPane playerBoard = null;
 	
 	public static void main(String[] args) {
 		launch(args);
@@ -56,7 +52,7 @@ public class UI extends Application {
 
 	@Override
     public void start(Stage stage) {
-		//sets up the main stage and the background 
+		//sets up the main window and the background 
 		primaryStage = stage;
         Group root = new Group();
         Scene scene = new Scene(root, 800, 600, Color.BLACK);
@@ -98,7 +94,7 @@ public class UI extends Application {
         //puts the blending into action
         circles.setEffect(new BoxBlur(10, 10, 3));
         
-        //moves the circles 
+        //moves the circles for a certain time interval 
         Timeline timeline = new Timeline();
         for (Node circle: circles.getChildren()) {
             timeline.getKeyFrames().addAll(
@@ -113,20 +109,25 @@ public class UI extends Application {
             );
         }
         
+        //These commands attach the panes created in the beginning so that I only have to create one but still change them 
         root.getChildren().add(base);
         root.getChildren().add(form); 
+        playerBoard = new GameBoardPane(base,glass,grid,form,root);
         
+        //passing in the panes that can be changed
         mainRender(base,glass,grid);
-        
-        
    
-     // play 40s of animation
+        // play 40s of animation
         timeline.play();
+        
         //command to present everything you see in the application 
         primaryStage.show();
     }
 
+	/* This method creates the main page. It is separate from the main method above so 
+	 * that when I have a menu but I can revert the current screens back to the original*/
 	public void mainRender(BorderPane base, VBox glass, GridPane grid){
+	// Creates Main Title
 		Label lbl = new Label("Lets Play!");
         lbl.setFont(Font.font("Amble CN", FontWeight.BOLD, 40));
         lbl.setTextFill(Color.web("#FFFFFF"));
@@ -137,12 +138,12 @@ public class UI extends Application {
         lbl3.setFont(Font.font("Amble CN", FontWeight.BOLD, 20));
         lbl3.setTextFill(Color.web("#FFFFFF"));
        
-    //creates the "Lets Play" button
+    //Creates the "Lets Play" button
         Button playBtn = new Button();
         playBtn.setText("Tic Tac Toe");
         playBtn.setStyle("-fx-font: 22 arial; -fx-base: #FFFFFF;");
         playBtn.setMaxSize(150.0, 150.0);
-    //mouse click action for the button
+    //Mouse click action for the button
         playBtn.setOnAction(new EventHandler<ActionEvent>() {
  
             @Override
@@ -150,12 +151,14 @@ public class UI extends Application {
                 playerBoard.render();
             }
         });
-    //creates the "Destroy" button
+        
+        
+    //Creates the "Destroy" button
       Button destroyBtn = new Button();
       destroyBtn.setText("Destroy");
       destroyBtn.setStyle("-fx-font: 22 arial; -fx-base: #FFFFFF;");
       destroyBtn.setMaxSize(150.0, 150.0);
-      //mouse click action for the button
+    //Mouse click action for the button
       destroyBtn.setOnAction(new EventHandler<ActionEvent>() {
  
             @Override
@@ -164,8 +167,7 @@ public class UI extends Application {
             }
         });
         
-    //create vbox
-      //glass = new VBox();
+  //This decorates the glass pane (translucent blue box)
       glass.getChildren().clear();
       glass.setStyle("-fx-background-color: rgba(0, 100, 100, 0.5); -fx-background-radius: 10;");
       glass.setPrefWidth(400.0);
@@ -174,8 +176,7 @@ public class UI extends Application {
       glass.setPadding(new Insets(200,0,0,100));
       base.setLeft(glass);
 	
-	// create grid 
-    //grid = new GridPane();
+  //This decorates the grid/game board that isn't yet present in the main window 
     grid.getChildren().clear();
     grid.setStyle("-fx-background-color: rgba(0, 0, 0, 0); -fx-background-radius: 10;");
     grid.setPrefWidth(400.0);
@@ -187,7 +188,7 @@ public class UI extends Application {
     grid.add(destroyBtn,40,80);
     base.setRight(grid);
      
-  //see through blue pane which is a border pane 
+  //translucent pane that just holds everything together 
     base.setStyle("-fx-background-color: rgba(0, 0, 0, 0); -fx-background-radius: 10;");
     base.setPrefWidth(800.0);
     base.setPrefHeight(600.0);
