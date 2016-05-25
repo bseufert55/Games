@@ -1,25 +1,32 @@
 package org.bb.frontend;
 
 import javafx.scene.control.Button;
-import javafx.scene.image.ImageView;
+
 
 public class GridButton extends Button{
 	
-	private Button btn;
 	private String state = "blank";
 	private int xCord = 0;
 	private int yCord = 0;
 	
 	public GridButton(){
-		btn = new Button();
-		
 	}
-	
+	//set the state of the button (can be x, o, or blank)
 	public void setState(String state){this.state = state;}
+	
+	//gets the state of the button
 	public String getState(){return state;}
+	
+	// sets the x - coordinate 
 	public void setX(int x){xCord = x;}
+	
+	// gets the x - coordinate 
 	public int getX(){return xCord;}
+	
+	// sets the y - coordinate 
 	public void setY(int x){yCord = x;}
+	
+	// gets the y - coordinate 
 	public int getY(){return yCord;}
 	
 	

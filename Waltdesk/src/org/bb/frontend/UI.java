@@ -4,6 +4,7 @@ import javafx.animation.KeyFrame;
 import javafx.animation.KeyValue;
 import javafx.animation.Timeline;
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
@@ -16,7 +17,6 @@ import javafx.scene.effect.BlendMode;
 import javafx.scene.effect.BoxBlur;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
-import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.CycleMethod;
@@ -43,7 +43,6 @@ public class UI extends Application {
 	private BorderPane base = new BorderPane();
 	private VBox glass = new VBox(); 
 	private GridPane grid = new GridPane();
-	private StackPane form = new StackPane();
 	private GameBoardPane playerBoard = null;
 	
 	public static void main(String[] args) {
@@ -110,9 +109,9 @@ public class UI extends Application {
         }
         
         //These commands attach the panes created in the beginning so that I only have to create one but still change them 
-        root.getChildren().add(base);
-        root.getChildren().add(form); 
-        playerBoard = new GameBoardPane(base,glass,grid,form,root);
+        root.getChildren().add(base); 
+        
+        playerBoard = new GameBoardPane(base,glass,grid,root);
         
         //passing in the panes that can be changed
         mainRender(base,glass,grid);
@@ -163,7 +162,8 @@ public class UI extends Application {
  
             @Override
             public void handle(ActionEvent event) {
-                System.out.println("Destroy screne");
+            	Platform.exit();
+                System.exit(0);
             }
         });
         

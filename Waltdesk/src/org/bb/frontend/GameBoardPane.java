@@ -23,21 +23,20 @@ public class GameBoardPane{
 	private BorderPane base = null;
 	private VBox glass = null;
 	private GridPane grid = null;
-	private StackPane form = null;
 	private Group root = null;
-// Necessary global variables 
+// Necessary global variables that are used by multiple methods
 	private Boolean isPlayerOne = false;
 	private Boolean isPlayerTwo = false;
 	private Boolean player = true;
 	private GridButton[][] playBtns = new GridButton[3][3];
 	private ArrayList<GridButton> btns = new ArrayList<GridButton>(9);
 	private int count = 0;
+	private String type = "";
 	
-	public GameBoardPane(BorderPane base,VBox glass,GridPane grid, StackPane form,Group root){
+	public GameBoardPane(BorderPane base,VBox glass,GridPane grid,Group root){
 		this.base = base;
 		this.glass = glass;
 		this.grid = grid;
-		this.form = form;
 		this.root = root;
 	}
 // Sets who is player 1 and who is player 2
@@ -48,7 +47,7 @@ public class GameBoardPane{
 	public Boolean getPOne(){return isPlayerOne;}
 	public Boolean getPTwo(){return isPlayerTwo;}
 
-//Creates the buttons used when you click the tic tac toe button/ enter the tic tac toe game
+//Creates the buttons used when you click the tic tac toe button ( you are entering the tic tac toe game)
 	public ArrayList<Button> getBtns(){
 		ArrayList<Button> btns = new ArrayList<Button>(5);
 		Button multiPlayer = new Button();
@@ -59,11 +58,14 @@ public class GameBoardPane{
  
             @Override
             public void handle(ActionEvent event) {
-            	PlayerForm pform = new PlayerForm(base,glass,grid,form,root);
+            	StackPane popUp = new StackPane();
+            	root.getChildren().add(popUp);
+            	PlayerForm pform = new PlayerForm(base,glass,grid,popUp,root);
                  pform.render();
             }
         });
 		
+		//Creates Single Player Button
 		Button singlePlayer = new Button();
 		singlePlayer.setText("Single Player");
 		singlePlayer.setStyle("-fx-font: 20 arial; -fx-base: #FFFFFF;");
@@ -72,28 +74,15 @@ public class GameBoardPane{
 			 
             @Override
             public void handle(ActionEvent event) {
-            	Players pOne = new Players("You",true);
-            	Players pTwo = new Players("Walter",false);
             	playBoard("single");
             	statusBoard("You", "Walter");
             }
         });
 		
-		Button cancel = new Button();
-		cancel.setText("Cancel");
-		cancel.setStyle("-fx-font: 20 arial; -fx-base: #FFFFFF;");
-		cancel.setMaxSize(150.0, 150.0);
-		cancel.setOnAction(new EventHandler<ActionEvent>() {
-			 
-            @Override
-            public void handle(ActionEvent event) {
-            	//render();
-            }
-        });
 		
+		//Attaches all the buttons into an ArrayList that can be called later and attached to the main stage
 		btns.add(multiPlayer);
 		btns.add(singlePlayer);
-		btns.add(cancel);
 		
         return btns;
         
@@ -130,12 +119,15 @@ public class GameBoardPane{
 		glass.getChildren().clear();
 		glass.setSpacing(20.0);
 		glass.setPadding(new Insets(100,0,0,100));
+		//create the title
 		Label title = new Label("Stats");
         title.setFont(Font.font("Amble CN", FontWeight.BOLD, 30));
         title.setTextFill(Color.web("#FFFFFF"));
+        //shows the name of player 1
         Label playerOne = new Label("Player 1: " + pOne);
         playerOne.setFont(Font.font("Amble CN", FontWeight.BOLD, 20));
         playerOne.setTextFill(Color.web("#FFFFFF"));
+        //shows the name of player 2
         Label playerTwo = new Label("Player 2: " + pTwo);
         playerTwo.setFont(Font.font("Amble CN", FontWeight.BOLD, 20));
         playerTwo.setTextFill(Color.web("#FFFFFF"));
@@ -146,7 +138,7 @@ public class GameBoardPane{
 	
 //This method changes the grid when you click the tic tac toe button
 	public void playBoard( String x){
-		final String type = x;
+		type = x;
 		grid.getChildren().clear();
 		
 		for(int r = 0; r < grid.getHgap(); r++){
@@ -170,18 +162,18 @@ public class GameBoardPane{
                     		((GridButton)event.getSource()).setState("x");
                     		((GridButton)event.getSource()).setText("X");
                     		((GridButton)event.getSource()).setStyle("-fx-font: 35 arial; -fx-background-color:rgba(225,13,48,.7); -fx-background-radius: 10;");
-                    		if(count == 9){
-                    			tieBoard();
-                    		} else if(count > 3){
-                    			checkBoard(btns);
-                    			
-                    		}
+                    		if(count > 3){
+                    			String result = checkBoard(btns);
+                    			if(count == 9 && result.equals("none")){
+                        			tieBoard();
+                        		} 
+                    		} 
                     		
                     		if(type.equals("single")){
                     			int row = (int) (Math.random() * 2);
                     			int col = (int) (Math.random() * 2);
                     			String play = checkPlays();
-                    			if(count > 3 && play.length() > 1){
+                    			if(count > 1 && play.length() > 1){
                     				row = Integer.parseInt(play.substring(0,1));
                     				col = Integer.parseInt(play.substring(1));
                     				
@@ -198,11 +190,11 @@ public class GameBoardPane{
                     			playBtns[row][col].setState("o");
                 				playBtns[row][col].setText("O");
                 				playBtns[row][col].setStyle("-fx-font: 35 arial; -fx-background-color:rgba(129,225,13,.7); -fx-background-radius: 10;");
-                				if(count == 9){
-                        			tieBoard();
-                        		} else if(count > 3){
-                        			checkBoard(btns);
-                        			
+                				if(count > 1){
+                        			String result = checkBoard(btns);
+                        			if(count == 4 && result.equals("none")){
+                            			tieBoard();
+                            		}
                         		}
                     		}
                     	}else if (!player){
@@ -210,11 +202,12 @@ public class GameBoardPane{
                     		((GridButton)event.getSource()).setState("o");
                     		((GridButton)event.getSource()).setText("O");
                     		((GridButton)event.getSource()).setStyle("-fx-font: 35 arial; -fx-background-color:rgba(129,225,13,.7); -fx-background-radius: 10;");
-                    		if(count == 9){
-                    			tieBoard();
-                    		} else if(count > 3){
-                    			checkBoard(btns);
-                    		}	
+                    		if(count > 3){
+                    			String result = checkBoard(btns);
+                    			if(count == 9 && result.equals("none")){
+                        			tieBoard();
+                        		} 
+                    		} 
                     	}
                     }
                   }
@@ -233,7 +226,7 @@ public class GameBoardPane{
         Label title = new Label("Tic Tac Toe");
         title.setFont(Font.font("Amble CN", FontWeight.BOLD, 40));
         title.setTextFill(Color.web("#FFFFFF"));
-        glass.getChildren().addAll(title,getBtns().get(0),getBtns().get(1),getBtns().get(2));
+        glass.getChildren().addAll(title,getBtns().get(0),getBtns().get(1));
         glass.setPadding(new Insets(100,0,0,100));
         glass.setSpacing(50.0);
         GridButton[][] gridBtns = createGrid();
@@ -255,19 +248,27 @@ public class GameBoardPane{
 	}
 
 // Checks to see if the buttons on the board have a winner play
-	public void checkBoard(ArrayList<GridButton> btns){
+	public String checkBoard(ArrayList<GridButton> btns){
 		if(isAcrossX(btns)){
 			winBoard(1);
+			return "";
 		} else if(isDownX(btns)){
 			winBoard(1);
+			return "";
 		} else if(isDiagonalX(btns)){
 			winBoard(1);
+			return "";
 		} else if(isAcrossO(btns)){
 			winBoard(2);
+			return "";
 		} else if(isDownO(btns)){
 			winBoard(2);
+			return "";
 		} else if(isDiagonalO(btns)){
 			winBoard(2);
+			return "";
+		} else {
+			return "none";
 		}
 	}
 
@@ -390,34 +391,115 @@ public class GameBoardPane{
 // If a player wins then this method changes the blue box to a congratulations sign
 	public void winBoard(int num){
 		glass.getChildren().clear();
+		
+		//creates the title
         Label title = new Label("Tic Tac Toe");
         title.setFont(Font.font("Amble CN", FontWeight.BOLD, 40));
         title.setTextFill(Color.web("#FFFFFF"));
+        
+        //congratulates the winner
         Label congrats = new Label("Congratulations!");
         congrats.setFont(Font.font("Amble CN", FontWeight.BOLD, 30));
         congrats.setTextFill(Color.web("#FFFFFF"));
+        
+        // states the winner
         Label winner = new Label("Player " + num + " Won!");
         winner.setFont(Font.font("Amble CN", FontWeight.BOLD, 25));
         winner.setTextFill(Color.web("#FFFFFF"));
-        glass.getChildren().addAll(title, congrats, winner);
+        
+        Button menu = new Button();
+		menu.setText("Menu");
+		menu.setStyle("-fx-font: 20 arial; -fx-base: #FFFFFF;");
+		menu.setMaxSize(150.0, 150.0);
+		menu.setOnAction(new EventHandler<ActionEvent>() {
+ 
+            @Override
+            public void handle(ActionEvent event) {
+            	GameBoardPane gameBd = new GameBoardPane(base,glass,grid,root);
+            	gameBd.render();
+            }
+        });
+        
+        Button playAgain = new Button();
+		playAgain.setText("Play Again?");
+		playAgain.setStyle("-fx-font: 20 arial; -fx-base: #FFFFFF;");
+		playAgain.setMaxSize(150.0, 150.0);
+		playAgain.setOnAction(new EventHandler<ActionEvent>() {
+ 
+            @Override
+            public void handle(ActionEvent event) {
+            	GameBoardPane gameBd = new GameBoardPane(base,glass,grid,root);
+            	if(type.equals("multi")){
+            		StackPane popUp = new StackPane();
+                	root.getChildren().add(popUp);
+                	PlayerForm pform = new PlayerForm(base,glass,grid,popUp,root);
+                     pform.render();
+            	}else{
+            		statusBoard("You", "Walter");
+            		gameBd.playBoard("single");
+            	}
+            }
+        });
+        
+        //attaches the labels to be shown
+        glass.getChildren().addAll(title, congrats, winner, playAgain, menu);
         glass.setPadding(new Insets(100,0,0,100));
         glass.setSpacing(50.0);
 	}
-	
+// This board shows the tied players 
 	public void tieBoard(){
 		glass.getChildren().clear();
+		
+		//creates the title
         Label title = new Label("Tic Tac Toe");
         title.setFont(Font.font("Amble CN", FontWeight.BOLD, 40));
         title.setTextFill(Color.web("#FFFFFF"));
-        Label congrats = new Label("Nice Try!");
+        
+        //congratulates the winner
+        Label congrats = new Label("It's a Tie!");
         congrats.setFont(Font.font("Amble CN", FontWeight.BOLD, 30));
-        congrats.setTextFill(Color.web("#FFFFFF"));
-        Label winner = new Label("It's a Tie!");
-        winner.setFont(Font.font("Amble CN", FontWeight.BOLD, 25));
-        winner.setTextFill(Color.web("#FFFFFF"));
-        glass.getChildren().addAll(title, congrats, winner);
+        congrats.setTextFill(Color.web("#FFFFFF"));    
+        
+        //Creates the play again button
+        Button playAgain = new Button();
+		playAgain.setText("Play Again?");
+		playAgain.setStyle("-fx-font: 20 arial; -fx-base: #FFFFFF;");
+		playAgain.setMaxSize(150.0, 150.0);
+		playAgain.setOnAction(new EventHandler<ActionEvent>() {
+ 
+            @Override
+            public void handle(ActionEvent event) {
+            	GameBoardPane gameBd = new GameBoardPane(base,glass,grid,root);
+            	if(type.equals("multi")){
+            		StackPane popUp = new StackPane();
+                	root.getChildren().add(popUp);
+                	PlayerForm pform = new PlayerForm(base,glass,grid,popUp,root);
+                     pform.render();
+            	}else{
+            		statusBoard("You", "Walter");
+            		gameBd.playBoard("single");
+            	}
+            }
+        });
+		
+        //creates a return to menu button
+        Button menu = new Button();
+		menu.setText("Menu");
+		menu.setStyle("-fx-font: 20 arial; -fx-base: #FFFFFF;");
+		menu.setMaxSize(150.0, 150.0);
+		menu.setOnAction(new EventHandler<ActionEvent>() {
+ 
+            @Override
+            public void handle(ActionEvent event) {
+            	GameBoardPane gameBd = new GameBoardPane(base,glass,grid,root);
+            	gameBd.render();
+            }
+        });
+        
+      //attaches the labels to be shown
+        glass.getChildren().addAll(title, congrats,playAgain,menu);
         glass.setPadding(new Insets(100,0,0,100));
-        glass.setSpacing(50.0);
+        glass.setSpacing(20.0);
 	}
 
 }
